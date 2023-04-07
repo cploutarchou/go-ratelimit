@@ -2,16 +2,13 @@ package ratelimiter
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 	
-	"github.com/redis/go-redis/v9"
-	
 	"github.com/go-redis/redis_rate/v10"
+	"github.com/redis/go-redis/v9"
 )
 
 type RateLimiter struct {
@@ -55,23 +52,16 @@ func (rl *RateLimiter) Limit(next http.Handler) http.Handler {
 			return
 		}
 		
-		fmt.Println("result.Allowed :", result.Allowed)
-		fmt.Println("rl.maxRate :", rl.maxRate)
-		fmt.Println(result.Allowed >= rl.maxRate)
-		if result.Allowed >= rl.maxRate {
+		if result.Allowed == 0 && result.Remaining == 0 {
+			w.Header().Set("X-RateLimit-Limit", strconv.Itoa(rl.maxRate))
+			w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(int(result.Remaining)))
+			w.Header().Set("X-RateLimit-Reset", strconv.Itoa(int(result.ResetAfter/time.Second)))
 			http.Error(w, "Too many requests", http.StatusTooManyRequests)
 			return
 		}
-		log.Println("X-Rate-Limit-Limit:", r.Header.Get("X-Rate-Limit-Limit"))
-		log.Println("X-Rate-Limit-Remaining:", r.Header.Get("X-Rate-Limit-Remaining"))
-		log.Println("X-Rate-Limit-Reset:", r.Header.Get("X-Rate-Limit-Reset"))
-		w.Header().Set("X-Rate-Limit-Limit", strconv.Itoa(rl.maxRate))
-		w.Header().Set("X-Rate-Limit-Remaining", strconv.Itoa(int(rl.maxRate-result.Remaining)))
-		w.Header().Set("X-Rate-Limit-Reset", strconv.Itoa(int(result.ResetAfter/time.Second)))
-		log.Println("X-Rate-Limit-Limit:", r.Header.Get("X-Rate-Limit-Limit"))
-		log.Println("X-Rate-Limit-Remaining:", r.Header.Get("X-Rate-Limit-Remaining"))
-		log.Println("X-Rate-Limit-Reset:", r.Header.Get("X-Rate-Limit-Reset"))
-		
+		w.Header().Set("X-RateLimit-Limit", strconv.Itoa(rl.maxRate))
+		w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(int(result.Remaining)))
+		w.Header().Set("X-RateLimit-Reset", strconv.Itoa(int(result.ResetAfter/time.Second)))
 		rl.next.ServeHTTP(w, r)
 	})
 }
