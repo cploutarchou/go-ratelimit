@@ -5,7 +5,7 @@ _________
 ```go
 import (
 	"github.com/go-redis/redis/v8"
-	"github.com/YOUR_USERNAME/ratelimiter"
+	"https://github.com/cploutarchou/go-ratelimit-rest-api"
 )
 ```
 ##### Creating a Limiter
@@ -58,7 +58,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/YOUR_USERNAME/ratelimiter"
+	"github.com/cploutarchou/go-ratelimit-rest-api"
 )
 
 func main() {
