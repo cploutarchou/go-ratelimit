@@ -1,6 +1,6 @@
-module github.com/cploutarchou/go-redis-rate-limit
+module github.com/cploutarchou/go-ratelimit
 
-go 1.20
+go 1.19
 
 require (
 	github.com/go-redis/redis_rate/v10 v10.0.1
